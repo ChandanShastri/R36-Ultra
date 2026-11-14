@@ -107,16 +107,23 @@ A good backup is often the difference between a recoverable device and a permane
 
 ## Flashing guidance
 
-This repository is intended to support common flashing workflows, but exact steps can vary by image and board revision. In general, the flash process may involve:
+### Flash the R36 Ultra EmuELEC 4.7 image
 
-- Entering a recovery or bootloader mode
-- Connecting the device to a PC with the proper cable
-- Running the correct flashing utility
-- Selecting the correct firmware image or partition file
-- Waiting for completion without interruption
-- Rebooting the unit and checking system health
+The [v1.0 release](https://github.com/ChandanShastri/R36-Ultra/releases/tag/v1.0) includes `R36Ultra_EmuElec4.7.img.xz`, an image intended to be flashed directly to a microSD card.
 
-If a guide in this repository includes a specific flash sequence, follow it exactly and do not skip steps.
+1. Back up any files you need from the microSD card. Flashing will erase the entire selected card.
+2. Download `R36Ultra_EmuElec4.7.img.xz` from the [v1.0 release assets](https://github.com/ChandanShastri/R36-Ultra/releases/tag/v1.0).
+3. (Optional) Verify the downloaded file's SHA-256 checksum:
+   ```
+   c90ffb80b5271e5af9b488f09b5842f900b719a333574cc1a71e770f56f9b9f7
+   ```
+4. Open [balenaEtcher](https://etcher.balena.io/), select the downloaded `.img.xz` file, select the correct microSD card, and start the flash. Etcher accepts compressed image files; do not extract the image first.
+5. Wait for Etcher to finish writing and verifying, then safely eject the card.
+6. With the R36 Ultra powered off, insert the card into its OS card slot and power on. Allow the first boot to finish; the EEROMS partition expands automatically during that boot.
+
+Double-check the selected drive before flashing so you do not overwrite another disk. Do not interrupt the write or first boot. If the device has separate OS and ROM card slots, use the OS slot for this image.
+
+Other images or hardware revisions may require a different procedure. Confirm compatibility before flashing; do not use these SD-card steps for firmware intended to be written to internal storage.
 
 ## General troubleshooting
 
