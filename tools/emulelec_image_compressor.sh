@@ -1,12 +1,9 @@
-# brew install e2fsprogs
-
-
 cat << 'EOF' > shrink_emuelec.sh
 #!/bin/bash
 set -e
 
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <path-to-original-img>" >&2
+    echo "Usage: $0 <path-to-img-file>" >&2
     exit 1
 fi
 
@@ -24,7 +21,7 @@ if [ ! -x "$DEBUGFS_BIN" ]; then
     exit 1
 fi
 
-echo "1. Attaching original image to inspect MBR partition layout..."
+echo "1. Attaching image to inspect MBR partition layout..."
 ATTACH_OUT=$(diskutil image attach --noMount "$IMG_PATH")
 BASE_DISK=$(echo "$ATTACH_OUT" | awk '/scheme/ {print $1}')
 
@@ -52,14 +49,19 @@ END_SECTOR=$((P2_START + P2_SIZE))
 P2_DISK="${BASE_DISK}s2"
 
 echo "2. Resetting /storage (ext4) and arming /storage/.please_resize_me..."
-# Remove initialization guard folders (.config, .cache, .kodi) and create .please_resize_me
+# Rename existing config directories (.config, .cache, .kodi) via ln+unlink
+# so fs-resize sees an uninitialized system, then create .please_resize_me
 TMP_EMPTY=$(mktemp)
 "$DEBUGFS_BIN" -w "$P2_DISK" << DBEOF
-rm .config
-rm .cache
-rm .kodi
+ln .config .config.old
+unlink .config
+ln .cache .cache.old
+unlink .cache
+ln .kodi .kodi.old
+unlink .kodi
 rm .please_resize_me
 write $TMP_EMPTY .please_resize_me
+ls -la
 quit
 DBEOF
 rm -f "$TMP_EMPTY"
@@ -90,6 +92,7 @@ fdisk "$BASE_DISK"
 diskutil eject "$BASE_DISK"
 
 echo "6. Compressing shrunk image..."
+rm -f "${IMG_PATH}.xz" "${IMG_PATH}.zip"
 if command -v xz >/dev/null 2>&1; then
     xz -9 -T0 -k -v "$IMG_PATH"
 else
@@ -102,5 +105,7 @@ EOF
 
 chmod +x shrink_emuelec.sh
 
+
+# brew install e2fsprogs
 # ./shrink_emuelec.sh ~/Documents/your_original_backup.img
 
