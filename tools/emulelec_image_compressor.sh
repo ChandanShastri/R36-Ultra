@@ -1,4 +1,4 @@
-brew install e2fsprogs
+# brew install e2fsprogs
 
 
 cat << 'EOF' > shrink_emuelec.sh
